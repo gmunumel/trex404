@@ -3,6 +3,7 @@ from game.ptero import Ptero
 from game.ground import Ground
 from game.cloud import Cloud
 from game.cactus import Cactus
+from game.score import Score
 from game.globals import *
 from pygame.locals import *
 import os, pygame, sys, random
@@ -54,6 +55,7 @@ def main():
   gameOver = False
   gameQuit = False
   
+  score = Score(screen)
   ground = Ground(screen, -1 * gameSpeed)
   trex = TRex(screen, 44, 47)
 
@@ -93,6 +95,7 @@ def main():
     clouds.update()
     cactus.update()
     pteros.update()
+    score.update()
 
     if pygame.display.get_surface() != None:
       screen.fill(BG_COLOR)
@@ -100,6 +103,7 @@ def main():
       clouds.draw(screen)
       cactus.draw(screen)
       pteros.draw(screen)
+      score.draw()
       trex.draw()
 
       pygame.display.update()
@@ -108,6 +112,7 @@ def main():
 
     if trex.isDead:
       gameOver = True
+      #print('score: {}'.format(score))
 
   while not gameQuit:
     for event in pygame.event.get():
