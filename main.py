@@ -10,7 +10,7 @@ import os, pygame, sys, random
 
 pygame.init()
 
-srcSize = (WIDTH, HEIGHT) = (600, 150)
+srcSize = (WIN_WIDTH, WIN_HEIGHT) = (600, 150)
 FPS = 60
 
 screen = pygame.display.set_mode(srcSize)
@@ -35,22 +35,25 @@ def create_cactus(cactus, last_obstacle, gameSpeed):
       last_obstacle.add(Cactus(gameSpeed, 40, 40))
     else:
       for l in last_obstacle:
-        if l.rect.right < WIDTH * 0.7 and random.randrange(0, 40) == 10:
+        if l.rect.right < WIN_WIDTH * 0.7 and random.randrange(0, 40) == 10:
           last_obstacle.empty()
           last_obstacle.add(Cactus(gameSpeed, 40, 40))
 
 def create_ptero(last_obstacle, gameSpeed):
   for l in last_obstacle:
-    if l.rect.right < WIDTH * 0.5 and random.randrange(0, 100) == 10:
+    if l.rect.right < WIN_WIDTH * 0.5 and random.randrange(0, 100) == 10:
       last_obstacle.empty()
       last_obstacle.add(Ptero(gameSpeed, 46, 40))
 
 def create_clouds(clouds):
   if len(clouds) < 7 and random.randrange(0, 150) == 10:
-      Cloud(WIDTH, random.randrange(HEIGHT / 5, HEIGHT / 2))
+      Cloud(WIN_WIDTH, random.randrange(WIN_HEIGHT / 5, WIN_HEIGHT / 2))
 
 
-def main():
+def main_game(
+  #genomes, 
+  #config
+  ):
   gameSpeed = 4
   gameOver = False
   gameQuit = False
@@ -127,6 +130,30 @@ def main():
   pygame.quit()
   sys.exit()
 
+
+def run_neat(config_path):
+  config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
+    neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
+
+  population = neat.Population(config)
+
+  population.add_reporter(neat.StdOutReporter(True))
+  stats = neat.StadisticsReporter()
+  population.add_reporter(stats)
+
+  winner = population.run(
+    main_game, #fitness function
+    50 # maximum number of iterations to run
+  )
+
+def config_neat():
+  local_dir = os.path.dirname(__file__)
+  config_path = os.path.join(local_dir, "config-feedforward.txt")
+  run_neat(config_path)
+
+def main():
+  #config_neat()
+  main_game()
 
 if __name__ == "__main__":
     main()

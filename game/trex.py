@@ -7,9 +7,9 @@ class TRex():
     self.images, self.rect = load_sprite_sheet('dino.png', 5, 1, sizeX, sizeY)
     self.images1, self.rect1 = load_sprite_sheet('dino_ducking.png', 2, 1, sizeX, sizeY)
     self.image = self.images[0]
-    self.trex_height = int(0.97 * HEIGHT)
+    self.trex_height = int(0.97 * WIN_HEIGHT)
     self.rect.bottom = self.trex_height
-    self.rect.left = WIDTH / 15
+    self.rect.left = WIN_WIDTH / 15
     self.index = 0
     self.counter = 0
     self.gravity = 0.6

@@ -7,8 +7,8 @@ class Score():
     self.font = pygame.font.Font('freesansbold.ttf', 10) 
     self.text = self.font.render('score: {}'.format(self.score), True, (105,105,105)) 
     self.rect = self.text.get_rect()  
-    self.rect.right = WIDTH * 0.95
-    self.rect.top = HEIGHT * 0.15
+    self.rect.right = WIN_WIDTH * 0.95
+    self.rect.top = WIN_HEIGHT * 0.15
     self.screen = screen
 
   def draw(self):
