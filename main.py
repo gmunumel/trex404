@@ -6,7 +6,7 @@ from game.cactus import Cactus
 from game.score import Score
 from game.globals import *
 from pygame.locals import *
-import os, pygame, sys, random
+import os, pygame, sys, random, neat
 
 pygame.init()
 
@@ -18,15 +18,25 @@ clock = pygame.time.Clock()
 pygame.display.set_caption("T-Rex 404")
 
 
-def check_cactus_collide(cactus, trex):
+def check_cactus_collide(cactus, trexs, genomes_track, nets):
   for cactu in cactus:
-    if pygame.sprite.collide_mask(trex, cactu):
-      trex.set_is_dead()
+    for i, trex in enumerate(trexs):
+      if pygame.sprite.collide_mask(trex, cactu):
+        trex.set_is_dead()
+        genomes_track[i].fitness -= 1
+        trexs.pop(i)
+        nets.pop(i)
+        genomes_track.pop(i)
 
-def check_pteros_collide(pteros, trex):
+def check_pteros_collide(pteros, trexs, genomes_track, nets):
   for ptero in pteros:
-    if pygame.sprite.collide_mask(trex, ptero):
-      trex.set_is_dead()
+    for i, trex in enumerate(trexs):
+      if pygame.sprite.collide_mask(trex, ptero):
+        trex.set_is_dead()
+        genomes_track[i].fitness -= 1
+        trexs.pop(i)
+        nets.pop(i)
+        genomes_track.pop(i)
 
 def create_cactus(cactus, last_obstacle, gameSpeed):
   if len(cactus) < 2:
@@ -49,55 +59,84 @@ def create_clouds(clouds):
   if len(clouds) < 7 and random.randrange(0, 150) == 10:
       Cloud(WIN_WIDTH, random.randrange(WIN_HEIGHT / 5, WIN_HEIGHT / 2))
 
+def update_fitness(trexs, nets, genomes_track, cactus):
+  for genome_track in genomes_track:
+    genome_track.fitness += 5
 
-def main_game(
-  #genomes, 
-  #config
-  ):
+  for i, trex in enumerate(trexs):
+    genomes_track[i].fitness += 0.1
+
+    for cactu in cactus:
+      output = nets[i].activate((trex.rect.right, abs(trex.rect.right - cactu.rect.left)))
+
+      if output[0] > 0.5:
+        trex.jump()
+
+def main_game(genomes, config):
   gameSpeed = 4
   gameOver = False
   gameQuit = False
-  
-  score = Score(screen)
+
   ground = Ground(screen, -1 * gameSpeed)
-  trex = TRex(screen, 44, 47)
+  score = Score(screen)
+  #score = 0
+
+  nets = []
+  genomes_track = []
+  trexs = [] #TRex(screen, 44, 47)
+
+  for _, genome in genomes:
+    net = neat.nn.FeedForwardNetwork.create(genome, config)
+    nets.append(net)
+    trexs.append(TRex(screen, 44, 47))
+    genome.fitness = 0
+    genomes_track.append(genome)
+
 
   clouds = pygame.sprite.Group()
   cactus = pygame.sprite.Group()
-  pteros = pygame.sprite.Group()
+  #pteros = pygame.sprite.Group()
   last_obstacle = pygame.sprite.Group()
 
   Cloud.containers = clouds
   Cactus.containers = cactus
-  Ptero.containers = pteros
+  #Ptero.containers = pteros
 
   while not gameOver:
     for event in pygame.event.get():
       if event.type == QUIT:
         gameOver = True
+        quit() #
         
       if event.type == KEYDOWN:
         if event.key == K_SPACE or event.key == K_UP:
-          trex.jump()
+          for trex in trexs:
+            trex.jump()
         if event.key == K_DOWN:
-          trex.duck()
+          for trex in trexs:
+            trex.duck()
 
       if event.type == KEYUP:
-        trex.no_duck()
+        for trex in trexs:
+          trex.no_duck()
 
     
-    check_cactus_collide(cactus, trex)
-    check_pteros_collide(pteros, trex)
+    check_cactus_collide(cactus, trexs, genomes_track, nets)
+    #check_pteros_collide(pteros, trexs, genomes_track, nets)
 
     create_cactus(cactus, last_obstacle, gameSpeed)
-    create_ptero(last_obstacle, gameSpeed)
+    #create_ptero(last_obstacle, gameSpeed)
     create_clouds(clouds)
 
-    trex.update()
+    for trex in trexs:
+      trex.update()
+      update_fitness(trexs, nets, genomes_track, cactus)
+      #score += 1
+
     ground.update()
     clouds.update()
     cactus.update()
-    pteros.update()
+    #pteros.update()
     score.update()
 
     if pygame.display.get_surface() != None:
@@ -105,16 +144,21 @@ def main_game(
       ground.draw()
       clouds.draw(screen)
       cactus.draw(screen)
-      pteros.draw(screen)
+      #pteros.draw(screen)
       score.draw()
-      trex.draw()
+
+      for trex in trexs:
+        trex.draw()
 
       pygame.display.update()
     
     clock.tick(FPS)
 
-    if trex.isDead:
+    if len(trexs) == 0:
       gameOver = True
+
+    #if trex.isDead:
+      #gameOver = True
       #print('score: {}'.format(score))
 
   while not gameQuit:
@@ -127,18 +171,17 @@ def main_game(
     
     clock.tick(FPS)
 
-  pygame.quit()
-  sys.exit()
+  quit()
 
 
 def run_neat(config_path):
-  config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
+  config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, 
     neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
 
   population = neat.Population(config)
 
   population.add_reporter(neat.StdOutReporter(True))
-  stats = neat.StadisticsReporter()
+  stats = neat.StatisticsReporter()
   population.add_reporter(stats)
 
   winner = population.run(
@@ -148,12 +191,16 @@ def run_neat(config_path):
 
 def config_neat():
   local_dir = os.path.dirname(__file__)
-  config_path = os.path.join(local_dir, "config-feedforward.txt")
+  config_path = os.path.join(local_dir, "neat/config-feedforward.txt")
   run_neat(config_path)
 
+def quit():
+  pygame.quit()
+  sys.exit()
+
 def main():
-  #config_neat()
+  config_neat()
   main_game()
 
 if __name__ == "__main__":
-    main()
+  main()

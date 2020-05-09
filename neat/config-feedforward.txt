@@ -6,15 +6,15 @@ reset_on_extinction   = False
 
 [DefaultGenome]
 # node activation options
-activation_default      = tanh #sigmoid
+activation_default      = tanh
 activation_mutate_rate  = 0.0
-activation_options      = tanh #sigmoid gauss 
+activation_options      = tanh
 #abs clamped cube exp gauss hat identity inv log relu sigmoid sin softplus square tanh
 
 # node aggregation options
-aggregation_default     = sum #random
+aggregation_default     = sum
 aggregation_mutate_rate = 0.0
-aggregation_options     = sum #sum product min max mean median maxabs
+aggregation_options     = sum
 
 # node bias options
 bias_init_mean          = 0.0
@@ -37,9 +37,9 @@ conn_delete_prob        = 0.5
 enabled_default         = True
 enabled_mutate_rate     = 0.01
 
-feed_forward            = True #False
+feed_forward            = True
 #initial_connection     = unconnected
-initial_connection      = full #partial_nodirect 0.5
+initial_connection      = full
 
 # node add/remove rates
 node_add_prob           = 0.2
@@ -47,8 +47,8 @@ node_delete_prob        = 0.2
 
 # network parameters
 num_hidden              = 0
-num_inputs              = 3 #1120
-num_outputs             = 1 #12
+num_inputs              = 2 
+num_outputs             = 1
 
 # node response options
 response_init_mean      = 1.0
@@ -69,14 +69,14 @@ weight_mutate_rate      = 0.8
 weight_replace_rate     = 0.1
 
 [DefaultSpeciesSet]
-compatibility_threshold = 3.0 #2.5
+compatibility_threshold = 3.0
 
 [DefaultStagnation]
 species_fitness_func = max
-max_stagnation       = 20 #50
-species_elitism      = 2 #0
+max_stagnation       = 20
+species_elitism      = 2
 
 [DefaultReproduction]
-elitism            = 2 #3
-survival_threshold = 0.2 #0.3
+elitism            = 2
+survival_threshold = 0.2
 
