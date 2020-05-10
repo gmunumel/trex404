@@ -15,6 +15,10 @@ python3 main.py
 ```
 
 
+## Demo application
+
+![Demo](/test/test1.gif)
+
 ## License 
 
 MIT
