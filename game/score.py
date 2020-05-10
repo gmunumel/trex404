@@ -11,6 +11,9 @@ class Score():
     self.rect.top = WIN_HEIGHT * 0.15
     self.screen = screen
 
+  def get_score(self):
+    return self.score
+
   def draw(self):
     self.text = self.font.render('score: {}'.format(self.score), True, (105,105,105)) 
     self.screen.blit(self.text, self.rect)

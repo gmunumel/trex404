@@ -11,6 +11,9 @@ class Ground():
     self.speed = speed
     self.screen = screen
 
+  def set_speed(self, speed):
+    self.speed = speed
+
   def draw(self):
     self.screen.blit(self.image, self.rect)
     self.screen.blit(self.image1, self.rect1)

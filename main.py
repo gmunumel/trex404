@@ -166,11 +166,18 @@ def main_game(genomes, config):
         trex.draw()
 
       pygame.display.update()
-    
-    clock.tick(FPS)
 
+    if (score.get_score() > 1000 and gameSpeed == 4) or \
+      (score.get_score() > 2000 and gameSpeed == 4.5) or \
+      (score.get_score() > 3000 and gameSpeed == 5) or \
+      (score.get_score() > 4000 and gameSpeed == 5.5):
+      gameSpeed += 0.5
+      ground.set_speed(-1 * gameSpeed)
+    
     if len(trexs) == 0:
       gameOver = True
+
+    clock.tick(FPS)
 
   while not gameQuit:
     for event in pygame.event.get():
