@@ -40,18 +40,17 @@ def check_pteros_collide(pteros, trexs, genomes_track, nets):
 
 def create_cactus(cactus, last_obstacle, gameSpeed):
   if len(cactus) < 2:
-    if len(cactus) == 0:
-      last_obstacle.empty()
+    if len(last_obstacle) == 0:
       last_obstacle.add(Cactus(gameSpeed, 40, 40))
     else:
       for l in last_obstacle:
-        if l.rect.right < WIN_WIDTH * 0.7 and random.randrange(0, 40) == 10:
+        if l.rect.right < WIN_WIDTH * 0.5 and random.randrange(0, 40) == 10:
           last_obstacle.empty()
           last_obstacle.add(Cactus(gameSpeed, 40, 40))
 
-def create_ptero(last_obstacle, gameSpeed):
+def create_ptero(pteros, last_obstacle, gameSpeed):
   for l in last_obstacle:
-    if l.rect.right < WIN_WIDTH * 0.5 and random.randrange(0, 100) == 10:
+    if l.rect.right < WIN_WIDTH * 0.75 and random.randrange(0,60) == 10:
       last_obstacle.empty()
       last_obstacle.add(Ptero(gameSpeed, 46, 40))
 
@@ -59,7 +58,7 @@ def create_clouds(clouds):
   if len(clouds) < 7 and random.randrange(0, 150) == 10:
       Cloud(WIN_WIDTH, random.randrange(WIN_HEIGHT / 5, WIN_HEIGHT / 2))
 
-def update_fitness(trexs, nets, genomes_track, cactus):
+def update_fitness(trexs, nets, genomes_track, cactus, pteros):
   for genome_track in genomes_track:
     genome_track.fitness += 5
 
@@ -67,10 +66,28 @@ def update_fitness(trexs, nets, genomes_track, cactus):
     genomes_track[i].fitness += 0.1
 
     for cactu in cactus:
-      output = nets[i].activate((trex.rect.right, abs(trex.rect.right - cactu.rect.left)))
+      distance_x = nets[i].activate((trex.rect.right, abs(trex.rect.right - cactu.rect.left)))
 
-      if output[0] > 0.5:
+      if distance_x[0] > 0.5 and not trex.isJumping:
         trex.jump()
+
+    for ptero in pteros:
+      distance_x = nets[i].activate((trex.rect.right, abs(trex.rect.right - ptero.rect.left)))
+
+      if distance_x[0] > 0.5:
+        distance_y = nets[i].activate((trex.rect.top, abs(trex.rect.top - ptero.rect.bottom)))
+
+        if distance_y[0] > 0.5 and not trex.isDucking:
+          trex.duck()
+        elif not trex.isJumping:
+          trex.jump()
+
+      else:
+        distance_x = nets[i].activate((trex.rect.left, abs(trex.rect.left - ptero.rect.right)))
+        
+        if distance_x[0] > 0.1:
+          trex.no_duck()
+
 
 def main_game(genomes, config):
   gameSpeed = 4
@@ -79,11 +96,10 @@ def main_game(genomes, config):
 
   ground = Ground(screen, -1 * gameSpeed)
   score = Score(screen)
-  #score = 0
 
   nets = []
   genomes_track = []
-  trexs = [] #TRex(screen, 44, 47)
+  trexs = []
 
   for _, genome in genomes:
     net = neat.nn.FeedForwardNetwork.create(genome, config)
@@ -95,18 +111,18 @@ def main_game(genomes, config):
 
   clouds = pygame.sprite.Group()
   cactus = pygame.sprite.Group()
-  #pteros = pygame.sprite.Group()
+  pteros = pygame.sprite.Group()
   last_obstacle = pygame.sprite.Group()
 
   Cloud.containers = clouds
   Cactus.containers = cactus
-  #Ptero.containers = pteros
+  Ptero.containers = pteros
 
   while not gameOver:
     for event in pygame.event.get():
       if event.type == QUIT:
         gameOver = True
-        quit() #
+        quit() 
         
       if event.type == KEYDOWN:
         if event.key == K_SPACE or event.key == K_UP:
@@ -122,21 +138,20 @@ def main_game(genomes, config):
 
     
     check_cactus_collide(cactus, trexs, genomes_track, nets)
-    #check_pteros_collide(pteros, trexs, genomes_track, nets)
+    check_pteros_collide(pteros, trexs, genomes_track, nets)
 
     create_cactus(cactus, last_obstacle, gameSpeed)
-    #create_ptero(last_obstacle, gameSpeed)
+    create_ptero(pteros, last_obstacle, gameSpeed)
     create_clouds(clouds)
 
     for trex in trexs:
       trex.update()
-      update_fitness(trexs, nets, genomes_track, cactus)
-      #score += 1
+      update_fitness(trexs, nets, genomes_track, cactus, pteros)
 
     ground.update()
     clouds.update()
     cactus.update()
-    #pteros.update()
+    pteros.update()
     score.update()
 
     if pygame.display.get_surface() != None:
@@ -144,7 +159,7 @@ def main_game(genomes, config):
       ground.draw()
       clouds.draw(screen)
       cactus.draw(screen)
-      #pteros.draw(screen)
+      pteros.draw(screen)
       score.draw()
 
       for trex in trexs:
@@ -156,10 +171,6 @@ def main_game(genomes, config):
 
     if len(trexs) == 0:
       gameOver = True
-
-    #if trex.isDead:
-      #gameOver = True
-      #print('score: {}'.format(score))
 
   while not gameQuit:
     for event in pygame.event.get():
