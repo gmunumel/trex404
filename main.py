@@ -179,6 +179,7 @@ def main_game(genomes, config):
 
     clock.tick(FPS)
 
+  """
   while not gameQuit:
     for event in pygame.event.get():
       if event.type == QUIT:
@@ -188,8 +189,9 @@ def main_game(genomes, config):
       pygame.display.update()
     
     clock.tick(FPS)
+  """
 
-  quit()
+  #quit()
 
 
 def run_neat(config_path):
@@ -207,6 +209,9 @@ def run_neat(config_path):
     50 # maximum number of iterations to run
   )
 
+  print('\nBest genome:\n{!s}'.format(winner))
+
+
 def config_neat():
   local_dir = os.path.dirname(__file__)
   config_path = os.path.join(local_dir, "neat/config-feedforward.txt")
@@ -218,7 +223,7 @@ def quit():
 
 def main():
   config_neat()
-  main_game()
+  #main_game()
 
 if __name__ == "__main__":
   main()
