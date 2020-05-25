@@ -1,6 +1,6 @@
 from game.globals import *
 from game.lib import load_sprite_sheet
-import pygame,  random
+import pygame, random
 
 class Ptero(pygame.sprite.Sprite):
   def __init__(self, speed = 5, sizeX = -1, sizeY = -1):
