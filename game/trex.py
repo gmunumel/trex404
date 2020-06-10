@@ -1,4 +1,3 @@
-#import pygame
 from game.globals import *
 from game.lib import load_sprite_sheet
 
