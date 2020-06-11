@@ -58,7 +58,7 @@ def create_clouds(clouds):
   if len(clouds) < 7 and random.randrange(0, 150) == 10:
       Cloud(WIN_WIDTH, random.randrange(WIN_HEIGHT / 5, WIN_HEIGHT / 2))
 
-def update_fitness(trexs, cactus, pteros, nets, genomes_track):
+def update_fitness(trexs, cactus, pteros, genomes_track, nets):
   for genome_track in genomes_track:
     genome_track.fitness += 5
 
@@ -146,7 +146,7 @@ def main_game(genomes, config):
 
     for trex in trexs:
       trex.update()
-      update_fitness(trexs, cactus, pteros, nets, genomes_track)
+      update_fitness(trexs, cactus, pteros, genomes_track, nets)
 
     ground.update()
     clouds.update()
