@@ -146,7 +146,8 @@ def main_game(genomes, config):
 
     for trex in trexs:
       trex.update()
-      update_fitness(trexs, cactus, pteros, genomes_track, nets)
+    
+    update_fitness(trexs, cactus, pteros, genomes_track, nets)
 
     ground.update()
     clouds.update()
